@@ -1,0 +1,10 @@
+---
+- hosts: VM2
+  remote_user: cc
+  vars_files:
+    - ./vars/default.yaml
+
+  tasks:
+    - name: Taint the master
+      command: kubectl taint nodes kubemaster node-role.kubernetes.io/master:NoSchedule-
+...
