@@ -46,22 +46,17 @@
       notify:
         - docker status
 
-    # - name: Add vagrant user to docker group
-    #   user:
-    #     name: vagrant
-    #     group: docker
-
     - name: Add user to docker group
       become: true
       user:
         name: "{{ansible_user}}"
         group: docker
 
-    # - name: add docker group
-    #   command: groupadd docker
+    - name: add docker group
+      command: groupadd docker
 
-    # - name: add current user to docker group
-    #   command: usermod -aG docker ${USER}
+    - name: add current user to docker group
+      command: usermod -aG docker ${USER}
 
     - name: Remove swapfile from /etc/fstab
       mount:
@@ -84,6 +79,7 @@
 
     # Creates the number of containers defined by the variable create_containers, using values from vars file
     - name: Create default containers
+      become: true
       docker_container:
         name: "{{ default_container_name }}{{ item }}"
         image: "{{ default_container_image }}"
@@ -103,6 +99,7 @@
         filename: kubernetes.list
 
     - name: Install Kubernetes binaries
+      become: true
       apt: 
         name: "{{ packages }}"
         state: present
@@ -115,22 +112,26 @@
           - kubernetes-cni
 
     - name: "Update the master (VM2) /etc/hosts file with node name"
+      become: true
       lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM2 kubemaster kubeworker1\n{{item}} Team11_VM2 kubemaster kubeworker1" state=present
       when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
       with_items: "{{ groups['VM2'] }}"
 
     - name: "Update the worker (VM3) /etc/hosts file with node name"
+      become: true
       lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM3 kubeworker2\n{{item}} Team11_VM2 kubeworker2" state=present
       when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
       with_items: "{{ groups['VM3'] }}"
 
     - name: Configure node ip
+      become: true
       lineinfile:
         path: /etc/default/kubelet
         line: KUBELET_EXTRA_ARGS=--node-ip={{ kubemaster }}
         create: yes
 
     - name: Restart kubelet
+      become: true
       service:
         name: kubelet
         daemon_reload: yes
