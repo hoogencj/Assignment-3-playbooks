@@ -1,0 +1,22 @@
+---
+- hosts: MyChameleonVMs  # machines on whom the action is performed
+  remote_user:  cc    # change username depending on what it is on the cloud
+  become: yes
+  collections:   # this is new starting with Ansible 2.9 (akin to importing package)
+    - openstack.cloud
+
+  tasks:
+  - name: Fixing all dependencies
+    ansible.builtin.shell: sudo apt --fix-broken install
+  - name: Updating cache
+    apt:
+      update_cache: yes
+  - name: Installing java dependencies
+    apt:
+      name: 
+        - libc6-i386
+        - libc6-x32
+  - name: Installing Java
+    apt:
+      name: default-jre
+...

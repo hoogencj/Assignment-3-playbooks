@@ -1,0 +1,19 @@
+---
+- name: Start Topic Utilizations
+  hosts: VM2
+  remote_user: cc
+  become: yes
+
+  tasks:
+    - name: Wait for kafka to start
+      pause:
+        seconds: 10
+    - name: Executing kafka-topics.sh
+      ansible.builtin.shell: bin/kafka-topics.sh --create --topic utilizations --bootstrap-server 129.114.27.56:9092 --partitions 1 --replication-factor 2 >> /home/cc/topics_log.txt
+      # ansible.builtin.shell: bin/kafka-topics.sh --create --topic utilizations --zookeeper localhost:2181 >> /home/kafka/topics_log.txt #--bootstrap-server localhost:9092 --partitions 2 --replication-factor 2 >> /home/kafka/topics_log.txt
+      # ansible.builtin.shell: bin/kafka-topics.sh --create --topic utilizations --bootstrap-server localhost:9092 >> /home/kafka/topics_log.txt
+      args:
+        chdir: /home/cc/kafka_2.13-3.0.0
+      environment: 
+        JAVA_HOME: /usr
+...

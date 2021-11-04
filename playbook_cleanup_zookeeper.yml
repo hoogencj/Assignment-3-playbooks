@@ -1,0 +1,10 @@
+---
+- name: Cleanup zookeeper logs
+  hosts: VM2
+  remote_user: cc
+  become: yes
+
+  tasks:
+    - name: remove zookeeper logs
+      ansible.builtin.shell: sudo rm -rf /tmp/zookeeper
+...

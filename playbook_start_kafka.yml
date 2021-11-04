@@ -1,0 +1,19 @@
+---
+- name: Start Kafka
+  hosts: MyChameleonVMs
+  remote_user: cc
+  become: yes
+
+  tasks:
+    - name: Wait for zookeeper to start
+      pause:
+        seconds: 10
+    - name: Executing kafka-server-start.sh
+      ansible.builtin.shell: sudo bin/kafka-server-start.sh config/server.properties >> /home/cc/kafka_log.txt
+      args:
+        chdir: /home/cc/kafka_2.13-3.0.0
+      environment: 
+        JAVA_HOME: /usr
+      async: 300
+      poll: 0
+...

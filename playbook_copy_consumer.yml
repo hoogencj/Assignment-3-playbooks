@@ -1,0 +1,16 @@
+---
+- hosts: MyChameleonVMs  # change to the appropriate alias
+  remote_user:  cc   # change to the appropriate user name on the cloud
+  collections:   # this is new starting with Ansible 2.9 (akin to importing package)
+    - openstack.cloud
+
+  # We will copy this very playbook file to the other side :-)
+  # Note the "mode" parameter, which will be handy if you need to change
+  # the permissions of the file after copying
+  tasks:
+  - name: Copy consumer.py from local to remote
+    copy:
+        src: ./consumer.py   # here you can give absolute path also.
+        dest: /home/cc/    # destination directory into which this file will get copied.
+                                      # if you want to name it differently, give the file name also.
+...

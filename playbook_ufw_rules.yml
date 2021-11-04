@@ -1,0 +1,16 @@
+---
+- name: Configure ufw rules
+  hosts: MyChameleonVMs
+  remote_user: cc
+  become: yes
+
+  tasks:
+    - name: Allow connections to port 9092
+      ansible.builtin.shell: sudo ufw limit 9092/tcp
+    - name: Allow connections to port 2181
+      ansible.builtin.shell: sudo ufw limit 2181/tcp
+    - name: Allow connections to port 6984
+      ansible.builtin.shell: sudo ufw limit 6984/tcp
+    - name: Allow connections to port 8080
+      ansible.builtin.shell: sudo ufw limit 8080/tcp
+...

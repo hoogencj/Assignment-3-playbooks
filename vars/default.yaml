@@ -1,0 +1,8 @@
+---
+create_containers: 4
+default_container_name: docker
+default_container_image: ubuntu
+default_container_command: sleep 1d
+kubemaster: "129.114.27.56"
+kubeworker: "129.114.26.42"
+...

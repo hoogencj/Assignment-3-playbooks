@@ -1,0 +1,19 @@
+---
+- name: Start consumers
+  hosts: VM3
+  remote_user: cc
+  become: yes
+  tasks: 
+    - name: Wait for kafka server to start
+      pause:
+        seconds: 5
+    - name: pip install kafka-python on VM3
+      pip:
+        name: kafka-python
+    - name: Execute /vagrant/consumer.py
+      ansible.builtin.script: /vagrant/consumer.py
+      args:
+        executable: python3
+      register: output
+    - debug: var=output.stdout_lines
+...

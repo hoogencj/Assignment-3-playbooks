@@ -1,0 +1,44 @@
+---
+- name: Configure Kafka
+  hosts: VM2
+  remote_user: cc
+  become: yes
+
+  tasks:
+  - name: Set broker id
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: 'broker\.id='
+      line: broker.id=0
+  - name: Set listeners
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: '#listeners=PLAINTEXT://:9092'
+      line: "listeners=PLAINTEXT://:9092"
+      # line: "listeners=PLAINTEXT://{{ ansible_default_ipv4.address }}:9092"
+  - name: Set advertised listeners
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: '#advertised\.listeners=PLAINTEXT://your\.host\.name:9092'
+      line: advertised.listeners=PLAINTEXT://129.114.27.56:9092
+  - name: Set listener security protocol
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: 'listener\.security\.protocol\.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL'
+      line: listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+  - name: Set replication factor
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: 'offsets\.topic\.replication\.factor'
+      line: offsets.topic.replication.factor=2
+  - name: Set transaction state replication factor
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: 'transaction\.state\.log\.replication\.factor'
+      line: transaction.state.log.replication.factor=2
+  - name: Set zookeeper connection
+    ansible.builtin.lineinfile:
+      path: /home/cc/kafka_2.13-3.0.0/config/server.properties
+      regexp: 'zookeeper\.connect='
+      line: "zookeeper.connect=129.114.27.56:2181,localhost:2181,{{ ansible_default_ipv4.address }}:2181"
+...

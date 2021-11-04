@@ -1,0 +1,16 @@
+---
+- name: Start Zookeeper
+  hosts: VM2
+  remote_user: cc
+  become: yes
+
+  tasks:
+    - name: Executing zookeeper-server-start.sh
+      ansible.builtin.shell: bin/zookeeper-server-start.sh config/zookeeper.properties >> /home/cc/zookeeper_log.txt
+      args:
+        chdir: /home/cc/kafka_2.13-3.0.0
+      environment: 
+        JAVA_HOME: /usr
+      async: 300
+      poll: 0
+...

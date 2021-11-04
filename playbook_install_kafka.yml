@@ -1,0 +1,20 @@
+---
+- hosts: MyChameleonVMs  # machines on whom the action is performed
+  remote_user:  cc    # change username depending on what it is on the cloud
+  become: yes
+  collections:   # this is new starting with Ansible 2.9 (akin to importing package)
+    - openstack.cloud
+
+  tasks:
+  - name: Downloading Kafka
+    get_url: 
+      url: https://dlcdn.apache.org/kafka/3.0.0/kafka_2.13-3.0.0.tgz
+      dest: /home/cc
+  - name: Tarring download file
+    ansible.builtin.unarchive:
+      remote_src: yes
+      src: /home/cc/kafka_2.13-3.0.0.tgz
+      dest: /home/cc
+  
+
+...
