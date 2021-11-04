@@ -5,152 +5,153 @@
     - ./vars/default.yaml
 
   tasks:
-    - name: Install aptitude using apt
-      become: true
-      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+    # - name: Install aptitude using apt
+    #   become: true
+    #   apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
 
-    - name: Install required system packages
-      become: true
-      apt: name={{ item }} state=latest update_cache=yes
-      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+    # - name: Install required system packages
+    #   become: true
+    #   apt: name={{ item }} state=latest update_cache=yes
+    #   loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
 
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+    # - name: Add Docker GPG apt Key
+    #   apt_key:
+    #     url: https://download.docker.com/linux/ubuntu/gpg
+    #     state: present
 
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu bionic stable
-        state: present
+    # - name: Add Docker Repository
+    #   apt_repository:
+    #     repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    #     state: present
 
-    - name: Update apt and install docker-ce
-      become: true
-      apt: update_cache=yes name=docker-ce state=latest
+    # - name: Update apt and install docker-ce
+    #   become: true
+    #   apt: update_cache=yes name=docker-ce state=latest
 
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
+    # - name: Install Docker Module for Python
+    #   pip:
+    #     name: docker
 
-    - name: Install docker and its dependecies
-      become: true
-      apt: 
-        name: "{{ packages }}"
-        state: present
-        update_cache: yes
-      vars:
-        packages:
-        - docker-ce 
-        - docker-ce-cli 
-        - containerd.io
-      notify:
-        - docker status
+    # - name: Install docker and its dependecies
+    #   become: true
+    #   apt: 
+    #     name: "{{ packages }}"
+    #     state: present
+    #     update_cache: yes
+    #   vars:
+    #     packages:
+    #     - docker-ce 
+    #     - docker-ce-cli 
+    #     - containerd.io
+    #   notify:
+    #     - docker status
 
-    - name: Add user to docker group
-      become: true
-      user:
-        name: "{{ansible_user}}"
-        group: docker
+    # - name: Add user to docker group
+    #   become: true
+    #   user:
+    #     name: "{{ansible_user}}"
+    #     group: docker
 
-    - name: add docker group
-      command: groupadd docker
+    # - name: add docker group
+    #   command: groupadd docker
 
-    - name: add current user to docker group
-      command: usermod -aG docker ${USER}
+    # - name: add current user to docker group
+    #   command: usermod -aG docker ${USER}
 
-    - name: Remove swapfile from /etc/fstab
-      mount:
-        name: "{{ item }}"
-        fstype: swap
-        state: absent
-      with_items:
-        - swap
-        - none
+    # - name: Remove swapfile from /etc/fstab
+    #   mount:
+    #     name: "{{ item }}"
+    #     fstype: swap
+    #     state: absent
+    #   with_items:
+    #     - swap
+    #     - none
 
-    - name: Disable swap
-      command: swapoff -a
-      when: ansible_swaptotal_mb > 0
+    # - name: Disable swap
+    #   command: swapoff -a
+    #   when: ansible_swaptotal_mb > 0
 
-    - name: Pull default Docker image
-      become: true
-      docker_image:
-        name: "{{ default_container_image }}"
-        source: pull
+    # - name: Pull default Docker image
+    #   become: true
+    #   docker_image:
+    #     name: "{{ default_container_image }}"
+    #     source: pull
 
-    # Creates the number of containers defined by the variable create_containers, using values from vars file
-    - name: Create default containers
-      become: true
-      docker_container:
-        name: "{{ default_container_name }}{{ item }}"
-        image: "{{ default_container_image }}"
-        command: "{{ default_container_command }}"
-        state: present
-      with_sequence: count={{ create_containers }}
+    # # Creates the number of containers defined by the variable create_containers, using values from vars file
+    # - name: Create default containers
+    #   become: true
+    #   docker_container:
+    #     name: "{{ default_container_name }}{{ item }}"
+    #     image: "{{ default_container_image }}"
+    #     command: "{{ default_container_command }}"
+    #     state: present
+    #   with_sequence: count={{ create_containers }}
 
-    - name: Add an apt signing key for Kubernetes
-      apt_key:
-        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-        state: present
+    # - name: Add an apt signing key for Kubernetes
+    #   apt_key:
+    #     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    #     state: present
 
-    - name: Adding apt repository for Kubernetes
-      apt_repository:
-        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
-        state: present
-        filename: kubernetes.list
+    # - name: Adding apt repository for Kubernetes
+    #   apt_repository:
+    #     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    #     state: present
+    #     filename: kubernetes.list
 
-    - name: Install Kubernetes binaries
-      become: true
-      apt: 
-        name: "{{ packages }}"
-        state: present
-        update_cache: yes
-      vars:
-        packages:
-          - kubelet 
-          - kubeadm 
-          - kubectl
-          - kubernetes-cni
+    # - name: Install Kubernetes binaries
+    #   become: true
+    #   apt: 
+    #     name: "{{ packages }}"
+    #     state: present
+    #     update_cache: yes
+    #   vars:
+    #     packages:
+    #       - kubelet 
+    #       - kubeadm 
+    #       - kubectl
+    #       - kubernetes-cni
 
-    - name: "Update the master (VM2) /etc/hosts file with node name"
-      become: true
-      lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM2 kubemaster kubeworker1\n{{item}} Team11_VM2 kubemaster kubeworker1" state=present
-      when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
-      with_items: "{{ groups['VM2'] }}"
+    # - name: "Update the master (VM2) /etc/hosts file with node name"
+    #   become: true
+    #   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM2 kubemaster kubeworker1\n{{item}} Team11_VM2 kubemaster kubeworker1" state=present
+    #   when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
+    #   with_items: "{{ groups['VM2'] }}"
 
-    - name: "Update the worker (VM3) /etc/hosts file with node name"
-      become: true
-      lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM3 kubeworker2\n{{item}} Team11_VM2 kubeworker2" state=present
-      when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
-      with_items: "{{ groups['VM3'] }}"
+    # - name: "Update the worker (VM3) /etc/hosts file with node name"
+    #   become: true
+    #   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} Team11_VM3 kubeworker2\n{{item}} Team11_VM2 kubeworker2" state=present
+    #   when: hostvars[item].ansible_default_ipv4.address is defined and inventory_hostname == item
+    #   with_items: "{{ groups['VM3'] }}"
 
-    - name: Configure node ip
-      become: true
-      lineinfile:
-        path: /etc/default/kubelet
-        line: KUBELET_EXTRA_ARGS=--node-ip={{ kubemaster }}
-        create: yes
+    # - name: Configure node ip
+    #   become: true
+    #   lineinfile:
+    #     path: /etc/default/kubelet
+    #     line: KUBELET_EXTRA_ARGS=--node-ip={{ kubemaster }}
+    #     create: yes
 
-    - name: Restart kubelet
-      become: true
-      service:
-        name: kubelet
-        daemon_reload: yes
-        state: restarted
+    # - name: Restart kubelet
+    #   become: true
+    #   service:
+    #     name: kubelet
+    #     daemon_reload: yes
+    #     state: restarted
 
-    - name: Initialize the Kubernetes cluster using kubeadm
-      shell: sudo kubeadm init --node-name kubemaster --pod-network-cidr=10.244.0.0/16
-      when: inventory_hostname == "{{ kubemaster }}"
+    # - name: Initialize the Kubernetes cluster using kubeadm
+    #   shell: sudo kubeadm init --node-name kubemaster --pod-network-cidr=10.244.0.0/16
+    #   when: inventory_hostname == "{{ kubemaster }}"
 
     - name: Setup kubeconfig for user
       command: "{{ item }}"
       when: inventory_hostname == "{{ kubemaster }}"
       with_items:
        - mkdir -p /home/${USER}/.kube
-       - cp -i /etc/kubernetes/admin.conf /home/${USER}/.kube/config
-       - chown ${USER}:docker /home/${USER}/.kube/config
+       - sudo cp -i /etc/kubernetes/admin.conf /home/${USER}/.kube/config
+       - sudo chown ${USER}:docker /home/${USER}/.kube/config
 
     - name: Install calico pod network
       command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+      when: inventory_hostname == "{{ kubemaster }}"
 
     - name: Generate join command
       command: kubeadm token create --print-join-command
