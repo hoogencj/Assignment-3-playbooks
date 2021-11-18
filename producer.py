@@ -17,6 +17,7 @@
 import os   # need this for popen
 import time # for sleep
 from kafka import KafkaProducer  # producer of events
+import pandas as pd
 
 # We can make this more sophisticated/elegant but for now it is just
 # hardcoded to the setup I have on my local VMs
@@ -30,13 +31,18 @@ producer = KafkaProducer (bootstrap_servers="129.114.25.80:30000",
                                           )  # wait for leader to write to log
 
 # say we send the contents 100 times after a sleep of 1 sec in between
-for i in range (200):
+for i in range (1):
     
     # get the output of the top command
-    process = os.popen ("top -n 1 -b")
+    # process = open("~/energy-sorted-1.csv")
+    reader = pd.read_csv("~/energy-sorted-1.csv", chunksize=1000)
 
     # read the contents that we wish to send as topic content
-    contents = process.read ()
+
+
+    for chunk in reader:
+        producer.send ("utilizations", value=bytes (chunk, 'ascii'))
+        producer.flush ()   # try to empty the sending buffer
 
     # send the contents under topic utilizations. Note that it expects
     # the contents in bytes so we convert it to bytes.
@@ -46,8 +52,8 @@ for i in range (200):
     # You will need to modify it to send a JSON structure, say something
     # like <timestamp, contents of top>
     #
-    producer.send ("utilizations", value=bytes (contents, 'ascii'))
-    producer.flush ()   # try to empty the sending buffer
+    # producer.send ("utilizations", value=bytes (contents, 'ascii'))
+    # producer.flush ()   # try to empty the sending buffer
 
     # sleep a second
     time.sleep (1)
